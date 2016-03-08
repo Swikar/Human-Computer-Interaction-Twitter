@@ -1,7 +1,7 @@
-SentiTweet
+InTweet Augmented
 ==========
 
-CMPT481 - HCI Final Project
+CS690 - Human Computer Interaction Project
 ---------------------------
 Using audio and visually augmented Twitter feeds, improve speed and accuracy in determining overall sentiment.
 
