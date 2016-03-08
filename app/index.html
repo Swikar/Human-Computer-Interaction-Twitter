@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html ng-app="sentiTweets">
+<head>
+	<link rel="stylesheet" href="common/twitterBootstrap/bootstrap.css">
+	<link href="common/twitterBootstrap/bootstrap-theme.css">
+	<link rel="stylesheet" href="common/sentiTweet/sentiTweet-visualAug.css">
+
+	<script rel="stylesheet" src="common/jquery/jquery-1.10.2.min.js"></script>
+	<script src="common/twitterBootstrap/bootstrap.js"></script>
+	<script src="common/angularjs/angular.js"></script>
+   <!--script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js"></script-->
+   <script src="common/howlerjs/howler.js"></script>
+   <script type="text/javascript" src="common/socketIO/socket.io.js"></script>
+	<script src="common/sentiTweet/sentiTweet.js"></script>
+</head>
+<body ng-controller="BrowseCtrl">
+	<div class="container">
+		<div class="header">
+			<h1>SentiTweet</h1>
+			<span class="input-group-btn">
+				<button class="btn" type="button" ng-click="showStream()">Stream</button>
+				<button class="btn" type="button" ng-click="showQuiz()">Quiz</button>
+			</span>
+		</div>
+		<br>
+		<div class="jumbotron">
+			<br>
+			<div id="streaming" class="input-group" ng-show="stream()">
+				<p class="lead">Enter a hashtag to view tweets!</p>
+				<a href="/auth/twitter">Login to Twitter!</a>
+				<br>
+				<input type="text" class="form-control input-lg" value="#" ng-model="hashTag">
+				<span class="input-group-btn">
+					<button class="btn btn-lg btn-info" type="button" ng-click="trackTweets()">
+						Go!
+					</button>
+					<button class="btn btn-lg btn-danger" type="button" ng-click="stopTracking()">
+						Stop
+					</button>
+				</span>
+			</div>
+
+
+			<div id="quiz1" ng-show="quiz()">
+				<p>You will be shown a stream of approximately 5 seconds worth of tweets, as they would appear in real time, your goal is to best identify the overall (average) sentiment of the group of tweets.</p>
+				<br>
+				<p>You will rank the tweets on a scale of one to ten, with 1 being very negative, 10 being very positive, and 5 being neutral.</p>
+				<br>
+				<p>You will be shown the groups of tweets with three different augmentations, text-only, text+visual, and text+audio</p>
+				<br>
+				<p>The following are examples of the visual and audio augmentations.  The colours demonstrate the spectrum of sentiments, from negative to positive.  Clicking on each section will play the audio augmentation associated with that level of sentiment.</p>
+				<pre sentiment="10" style="color:white;" ng-click="playSound(10)">Very Positive Sentiment</pre>
+				<pre sentiment="9" ng-click="playSound(9)"></pre>				
+				<pre sentiment="8" ng-click="playSound(8)"></pre>			
+				<pre sentiment="7" ng-click="playSound(7)"></pre>			
+				<pre sentiment="6" ng-click="playSound(6)"></pre>
+				<pre sentiment="5" ng-click="playSound(5)"></pre>		
+				<pre sentiment="4" ng-click="playSound(4)"></pre>			
+				<pre sentiment="3" ng-click="playSound(3)"></pre>			
+				<pre sentiment="2" ng-click="playSound(2)"></pre>
+				<pre sentiment="1" ng-click="playSound(1)"></pre>
+				<pre sentiment="-1" ng-click="playSound(-1)"></pre>
+				<pre sentiment="-2" ng-click="playSound(-2)"></pre>
+				<pre sentiment="-3" ng-click="playSound(-3)"></pre>			
+				<pre sentiment="-4" ng-click="playSound(-4)"></pre>			
+				<pre sentiment="-5" ng-click="playSound(-5)"></pre>		
+				<pre sentiment="-6" ng-click="playSound(-6)"></pre>
+				<pre sentiment="-7" ng-click="playSound(-7)"></pre>			
+				<pre sentiment="-8" ng-click="playSound(-8)"></pre>			
+				<pre sentiment="-9" ng-click="playSound(-9)"></pre>				
+				<pre sentiment="-10" style="color:white;" ng-click="playSound(-10)">Very Negative Sentiment</pre>
+
+				<button class="btn btn-success" ng-click="trackTweets()">Begin</button>
+			</div>
+
+			<div id="answers" ng-show="answers()">
+				<p>Please enter your prediction of the sentiment of the previous group of tweets:</p>
+				<span class="label label-primary">Negative</span>
+				<div class="btn-group" id="answerGroup">
+				  <button type="button" class="btn btn-default" value="1">1</button>
+				  <button type="button" class="btn btn-default" value="2">2</button>
+				  <button type="button" class="btn btn-default" value="3">3</button>
+				  <button type="button" class="btn btn-default" value="4">4</button>
+				  <button type="button" class="btn btn-default" value="5">5</button>
+				  <button type="button" class="btn btn-default" value="6">6</button>
+				  <button type="button" class="btn btn-default" value="7">7</button>
+				  <button type="button" class="btn btn-default" value="8">8</button>
+				  <button type="button" class="btn btn-default" value="9">9</button>
+				  <button type="button" class="btn btn-default" value="10">10</button>
+				</div>
+				<span class="label label-success">Positive</span>
+				<br>
+				<button class="btn btn-success" ng-click="trackTweets()">Next Trial</button>
+			</div>
+
+			<div id="results" ng-show="results()">
+				<h2>The Average Sentiment Was</h2>
+				<h1>{{printAverage()}}</h1>
+				<table>
+					<tr>
+						<td>No Augmentation</td>
+						<td>{{getResults(1)}}</td>
+					</tr>
+					<tr>
+						<td>Visual Augmentation</td>
+						<td>{{getResults(2)}}</td>
+					</tr>
+					<tr>
+						<td>Audio Augmentation</td>
+						<td>{{getResults(3)}}</td>
+					</tr>
+				</table>
+				<br>
+				<button class="btn btn-success" ng-click="trackTweets()">Next Trial</button>
+			</div>
+
+	</div>
+			<div id="tweetStream" ng-show="tweetsDiv()">
+    <ul>
+      <pre ng-repeat="t in tweets" sentiment={{visAug(t.sentiment)}}><strong>{{t.user.screen_name}}</strong><br>{{t.text}}</pre>
+    </ul>
+
+		</div>
+</body>
+</html>

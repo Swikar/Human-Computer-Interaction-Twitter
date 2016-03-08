@@ -1,0 +1,21 @@
+{
+  "name": "SentiTweet",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "socket.io": "*",
+    "stylus": "*",
+    "express": "*",
+    "ejs":"*",
+    "ntwitter":"*",
+    "oauth":"*",
+    "sentiment":"*",
+    "file":"*",
+    "line-by-line":"*",
+    "mongodb":"*",
+    "async":"*"
+  }
+}
